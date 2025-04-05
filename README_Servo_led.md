@@ -1,13 +1,14 @@
-# Servo Motor Control in Arduino Mega 2560 using Python with pyFirmata
+# Arduino Servo Motor and LED Control using Python with pyFirmata
 
 ## Overview
-This project demonstrates how to control an Arduino Mega 2560 board using Python with the pyFirmata library. The example showcases basic servo motor control, where a servo connected to an Arduino board sweeps between 0° and 180° at a specified interval.
+This project demonstrates how to control both a servo motor and an LED on an Arduino Mega 2560 board using Python with the pyFirmata library. The servo motor sweeps between 0° and 180°, and the LED blinks at regular intervals.
 
 ## Prerequisites
 Before running this project, ensure you have the following:
 
 - **Arduino Mega 2560 Board**
 - **Servo Motor**
+- **LED** (optional, or use the built-in one on Pin 13)
 - **USB Cable**
 - **Computer with Python installed** (Python 3.10.0 recommended)
 - **Arduino IDE** to upload the Firmata firmware
@@ -48,34 +49,45 @@ The `servo_motor.py` script contains:
 from pyfirmata import Arduino, util
 import time
 
-board = Arduino('COM7')  # Change COM port as per your setup
-servo = board.get_pin('d:6:s')  # Servo on pin 6
+board = Arduino('COM7')  # Change COM port 
+led_pin = 13 # digital pin
+
+servo_pin = 6 # analog pin
+servo = board.get_pin(f'd:{servo_pin}:s')  # Attach servo
 
 while True:
-    for angle in range(0, 181, 10):
+    print("Servo motor control")
+    for angle in range(0, 181, 10):  # Move from 0° to 180°
         servo.write(angle)
         time.sleep(0.5)
-    for angle in range(180, -1, -10):
+    
+    for angle in range(180, -1, -10):  # Move from 180° to 0°
         servo.write(angle)
         time.sleep(0.5)
+            
+    print("Blinking LED on pin 13")
+    board.digital[led_pin].write(1)  # Turn LED ON
+    time.sleep(1)  # Wait for 1 second
+    board.digital[led_pin].write(0)  # Turn LED OFF
+    time.sleep(1)  # Wait for 1 second
 ```
 
 ### Explanation:
-- `Arduino('COM7')`: Connects to the Arduino board on the specified COM port.
-- `board.get_pin('d:6:s')`: Initializes digital pin 6 as a servo control pin.
-- `servo.write(angle)`: Rotates the servo to the specified angle.
-- `time.sleep(0.5)`: Pauses for 0.5 seconds between angle updates.
-- The loop sweeps the servo from 0° to 180° and back repeatedly.
+- `Arduino('COM7')`: Connects to the Arduino board on COM7. Change it according to your system.
+- `get_pin(f'd:{servo_pin}:s')`: Sets pin 6 as a servo pin.
+- The servo sweeps from 0° to 180° and back.
+- Pin 13 is used to blink an LED on and off.
+- All actions repeat in an infinite loop.
 
 ## Customization
-- Change `'d:6:s'` to another PWM-capable pin if needed.
-- Modify the `range()` values to adjust sweep angle.
-- Adjust `time.sleep(0.5)` to speed up or slow down the sweep.
+- Change `servo_pin = 6` to another PWM-capable pin.
+- Modify `time.sleep()` to adjust speed for servo and LED blinking.
+- Use a different `led_pin` if needed.
 
 ## Troubleshooting
-- **Arduino Not Detected?** Check the COM port and replace `'COM7'` with the correct port (e.g., `/dev/ttyUSB0` on Linux/Mac).
-- **Ensure StandardFirmata is uploaded** to the Arduino.
-- **Verify pyFirmata installation** using:
+- **Arduino Not Detected?** Check your COM port and update `'COM7'` accordingly.
+- **Ensure StandardFirmata is uploaded** to your Arduino.
+- **Verify pyFirmata installation**:
   ```sh
   pip list | grep pyfirmata
   ```
